@@ -84,3 +84,137 @@ data12 = data12.reset_index().drop('index', axis=1)
 print(f"Shape of data12: {data12.shape}")
 print(f"Shape of data23: {data23.shape}")
 print(f"Shape of data13: {data13.shape}")
+
+
+# Adaline class
+class Adline:
+    def __init__(self, lr=0.00001, n_iter=1000):
+        self.lr = lr
+        self.n_iter = n_iter
+
+    def fit(self, X, y):
+        self.weights = np.zeros(1 + X.shape[1]).reshape(-1, 1)
+
+        # self.weights = np.random.rand(X.shape[1]+1, 1)
+        # self.weights = np.full((101,1),0.001)
+        self.errors = []
+
+        for i in range(self.n_iter):
+            output = self.activation_function(self.net_input(X))
+            Y = y.values
+            output = output.reshape(-1, 1)
+            errors = Y - output
+
+            self.weights[1:] = self.weights[1:] + self.lr * X.T.dot(errors)
+            self.weights[0] = self.weights[0] + self.lr * errors.sum()
+            cost = (errors ** 2).sum() / 2.0
+            self.errors.append(cost)
+
+            if (i > 2 and np.isclose(self.errors[-2], self.errors[-1], rtol=1e-4)):
+                return (i, errors)
+                break
+
+        return self
+
+    def net_input(self, X):
+        return np.dot(X.astype('float64'), self.weights[1:]) + self.weights[0]
+
+    def predict(self, X):
+        return np.where(self.net_input(X) >= 0.0, 1, -1)
+
+    def get_params(deep=True):
+        """
+        Get parameters of the Adline model.
+        """
+        return {
+            'lr': self.lr,
+            'n_iter': self.n_iter,
+            'weights': self.weights
+        }
+
+    def cross_validate(self, X, y, n_folds=10):
+        """
+        Perform n-fold cross-validation for the Adline model on the given data.
+        """
+        kf = KFold(n_splits=n_folds)
+        scores = []
+        iters = []
+        for train_index, test_index in kf.split(X):
+            X_train, X_test = X[train_index[0]:], X[test_index[0]:]
+            y_train, y_test = y[train_index[0]:], y[test_index[0]:]
+            scaler = StandardScaler()
+            X_train = scaler.fit_transform(X_train)
+            X_test = scaler.fit_transform(X_test)
+            (i, cost) = self.fit(X_train, y_train)
+            iters.append(i)
+            score = self.score(X_test, y_test)
+            scores.append(score)
+
+        return (scores, np.mean(scores), iters, cost)
+
+    def score(self, X, y):
+        """
+        Return the accuracy score for the Adline model on the given data.
+        """
+        y_pred = self.predict(X)
+        accuracy = accuracy_score(y, y_pred)
+        return accuracy
+
+    def activation_function(self, X):
+        return X
+
+
+def trainSubTable(df):
+    X = df.drop(columns=['category'])
+    y = pd.DataFrame(df.category)
+    if (df['category'] == 3.0).any():
+        y = y.replace(3.0, -1.0)
+    elif (df['category'] == 2.0).any():
+        y = y.replace(2.0, -1.0)
+    if (df['category'] == 2.0).any() and (df['category'] == 3.0).any():
+        y = y.replace(2.0, 1.0)
+
+    # Scale features
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    kf = KFold(n_splits=5, random_state=42, shuffle=True)
+    adaline = Adline()
+
+    scores, scores_mean, i, cost = adaline.cross_validate(X_train, y_train, n_folds=5)
+    final_scores = adaline.score(X_test, y_test)
+
+    d = {'score': final_scores}
+    return (d, scores, scores_mean, i, cost)
+
+test_score12,scores12,scores_mean12,i12,cost12= trainSubTable(data12)
+test_score13,scores13,scores_mean13,i13,cost13 = trainSubTable(data13)
+test_score23,scores23,scores_mean23,i23,cost23=trainSubTable(data23)
+
+# Calculate the accuracy of the model on the test set
+std_dev12 = np.std(scores12)
+std_dev13 = np.std(scores13)
+std_dev23 = np.std(scores23)
+
+print("\nThis is the Adaline algorithm on 1 versus 2: ")
+print("Standard deviation of accuracy scores: ", std_dev12)
+print("Average number of iterations before convergence:", i12, " Mean:" , np.mean(i12))
+print("accuracy across all folds:", scores12)
+print("Average accuracy across all folds:", scores_mean12)
+print("Test accuracy score:", test_score12)
+
+
+print("\nThis is the Adaline algorithm on 1 versus 3: ")
+print("Standard deviation of accuracy scores: ", std_dev13)
+print("Average number of iterations before convergence:", i13, " Mean:" , np.mean(i13))
+print("accuracy across all folds:", scores13)
+print("Average accuracy across all folds:", scores_mean13)
+print("Test accuracy score:", test_score13)
+
+
+print("\nThis is the Adaline algorithm on 2 versus 3: ")
+print("Standard deviation of accuracy scores: ", std_dev23)
+print("Average number of iterations before convergence:", i23, " Mean:" , np.mean(i23))
+print("accuracy across all folds:", scores23)
+print("Average accuracy across all folds:", scores_mean23)
+print("Test accuracy score:", test_score23)
