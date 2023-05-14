@@ -199,6 +199,7 @@ def trainSubTable(df):
     d = {'score': final_scores}
     return d, scores, scores_mean, i, cost
 
+
 print("\n -----Calculating the datasets ------- ")
 test_score12,scores12,scores_mean12,i12,cost12 = trainSubTable(data12)
 test_score13,scores13,scores_mean13,i13,cost13 = trainSubTable(data13)
@@ -209,25 +210,25 @@ std_dev12 = np.std(scores12)
 std_dev13 = np.std(scores13)
 std_dev23 = np.std(scores23)
 
-print("\nThis is the Adaline algorithm on 1 versus 2: ")
-print("Standard deviation of accuracy scores: ", std_dev12)
-print("Average number of iterations before convergence:", i12, " Mean:" , np.mean(i12))
-print("accuracy across all folds:", scores12)
+print("\n -----Predicting by Adaline algorithm 1(ב) versus 2(ל) ------- ")
+print("Std accuracy scores: ", std_dev12)
+print("Average number of iterations before convergence:", i12, " Mean:", np.mean(i12))
+print("accuracies in the cross validation:", scores12)
 print("Average accuracy across all folds:", scores_mean12)
 print("Test accuracy score:", test_score12)
 
 
-print("\nThis is the Adaline algorithm on 1 versus 3: ")
-print("Standard deviation of accuracy scores: ", std_dev13)
+print("\n -----Predicting by Adaline algorithm 1(ב) versus 3(מ) ------- ")
+print("Std accuracy scores: ", std_dev13)
 print("Average number of iterations before convergence:", i13, " Mean:" , np.mean(i13))
-print("accuracy across all folds:", scores13)
+print("accuracies in the cross validation:", scores13)
 print("Average accuracy across all folds:", scores_mean13)
 print("Test accuracy score:", test_score13)
 
 
-print("\nThis is the Adaline algorithm on 2 versus 3: ")
-print("Standard deviation of accuracy scores: ", std_dev23)
+print("\n -----Predicting by Adaline algorithm 2(ל) versus 3(מ) ------- ")
+print("Std accuracy scores: ", std_dev23)
 print("Average number of iterations before convergence:", i23, " Mean:" , np.mean(i23))
-print("accuracy across all folds:", scores23)
+print("accuracies in the cross validation:", scores23)
 print("Average accuracy across all folds:", scores_mean23)
 print("Test accuracy score:", test_score23)
