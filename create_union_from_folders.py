@@ -5,8 +5,8 @@ directory1 = 'קבצים (מ,ב,ל)'
 directory2 = 'קבצים בהטייה של 15_ לשני הצדדים (מ,ב,ל)'
 
 # Output file path
-
-output_file = 'Data_15%_rotated_writing.txt'
+output_file1 = 'Data_regular_writing.txt'
+output_file2 = 'Data_15%_rotated_writing.txt'
 
 # Initialize the merged content
 merged_content = ''
@@ -19,7 +19,7 @@ for filename in os.listdir(directory2):
             content = file.read().strip()
             merged_content += content + '\n'
 
-with open(output_file, 'w', encoding='utf-8') as file:
+with open(output_file2, 'w', encoding='utf-8') as file:
     file.write(merged_content)
 
 print("Merged content has been written to the output file.")

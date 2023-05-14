@@ -2,11 +2,7 @@ import itertools
 import os
 import pandas as pd
 import numpy as np
-from collections import namedtuple
-
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
@@ -14,14 +10,14 @@ from sklearn.preprocessing import StandardScaler
 import chardet
 
 print(" -----loading the files------- ")
-folder1_path = 'קבצים (מ,ב,ל)'
+# folder1_path = 'קבצים (מ,ב,ל)'
 file1 = 'Data_regular_writing.txt'
-file_names1 = os.listdir(folder1_path)
+# file_names1 = os.listdir(folder1_path)
 print("first folder loaded")
 
-folder2_path = 'קבצים בהטייה של 15_ לשני הצדדים (מ,ב,ל)'
+# folder2_path = 'קבצים בהטייה של 15_ לשני הצדדים (מ,ב,ל)'
 file2 = 'Data_15%_rotated_writing.txt'
-file_names2 = os.listdir(folder2_path)
+# file_names2 = os.listdir(folder2_path)
 print("second folder loaded")
 
 
@@ -135,7 +131,7 @@ class Adline:
     def predict(self, X):
         return np.where(self.net_input(X) >= 0.0, 1, -1)
 
-    def get_params(deep=True):
+    def get_params(self, deep=True):
         """
         Get parameters of the Adline model.
         """
@@ -147,7 +143,7 @@ class Adline:
 
     def cross_validate(self, X, y, n_folds=10):
         """
-        Perform n-fold cross-validation for the Adline model on the given data.
+        Perform n-fold cross-validation for the Adaline model on the given data.
         """
         kf = KFold(n_splits=n_folds)
         scores = []
@@ -167,7 +163,7 @@ class Adline:
 
     def score(self, X, y):
         """
-        Return the accuracy score for the Adline model on the given data.
+        Return the accuracy score for the Adaline model on the given data.
         """
         y_pred = self.predict(X)
         accuracy = accuracy_score(y, y_pred)
@@ -180,6 +176,8 @@ class Adline:
 def trainSubTable(df):
     X = df.drop(columns=['category'])
     y = pd.DataFrame(df.category)
+
+    # Convert the values in the pairs' comparison tables to 1 and -1 instead of the original label
     if (df['category'] == 3.0).any():
         y = y.replace(3.0, -1.0)
     elif (df['category'] == 2.0).any():
