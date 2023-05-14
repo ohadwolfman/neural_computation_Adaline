@@ -12,14 +12,15 @@ from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
 
 import chardet
-import matplotlib.pyplot as plt
 
 print(" -----loading the files------- ")
 folder1_path = 'קבצים (מ,ב,ל)'
+# folder1_path = 'Data_regular_writing.txt'
 file_names1 = os.listdir(folder1_path)
 print("first folder loaded")
 
 folder2_path = 'קבצים בהטייה של 15_ לשני הצדדים (מ,ב,ל)'
+# folder2_path = 'Data_15%_rotated_writing.txt'
 file_names2 = os.listdir(folder2_path)
 print("second folder loaded")
 
