@@ -15,17 +15,28 @@ import chardet
 
 print(" -----loading the files------- ")
 folder1_path = 'קבצים (מ,ב,ל)'
-# folder1_path = 'Data_regular_writing.txt'
+file1 = 'Data_regular_writing.txt'
 file_names1 = os.listdir(folder1_path)
 print("first folder loaded")
 
 folder2_path = 'קבצים בהטייה של 15_ לשני הצדדים (מ,ב,ל)'
-# folder2_path = 'Data_15%_rotated_writing.txt'
+file2 = 'Data_15%_rotated_writing.txt'
 file_names2 = os.listdir(folder2_path)
 print("second folder loaded")
 
 
 print("\n -----Convert the file's content into DataFrame------- ")
+def read_and_create_df(fila_name):
+    with open(fila_name, 'r', encoding='latin-1') as f:
+        content = f.readlines()
+
+    # remove newline characters and split each line into a list of values
+    content = [s.replace(', ', ',').replace(' ,', ',').replace(']', '').replace('[', '') for s in content]
+    content = [line.strip().strip('()').split(',') for line in content]
+    df = pd.DataFrame(content)
+    return df
+
+# If we would want to create the DataFrame from folder that contains txt files of vectors we would use this function:
 def read_and_process_files(folder_path):
     file_names = os.listdir(folder_path)
     fulldf = pd.DataFrame()
@@ -45,8 +56,11 @@ def read_and_process_files(folder_path):
     return fulldf
 
 
-finaldf = pd.concat([read_and_process_files(folder1_path),
-                    read_and_process_files(folder2_path)], ignore_index=True)
+# Join the DataFrames from both of the files
+finaldf = pd.concat([read_and_create_df(file1),
+                    read_and_create_df(file2)], ignore_index=True)
+
+# Changing the first column to 'category' - that present the label column
 finaldf.rename({0:'category'}, axis=1, inplace=True)
 
 print(f"The full df has been loaded and contain {finaldf.shape[0]} rows")
@@ -55,7 +69,6 @@ print(finaldf.head(3))  # present 3 first rows
 
 
 print("\n -----Clean the DataFrame------- ")
-# Drop the rows with null, and in addition every row that returns exception will be dropped too
 # Drop the rows with null, and in addition every row that returns an exception will be dropped too
 rows_to_drop = finaldf[finaldf.isnull().any(axis=1)].index.tolist()
 
@@ -70,11 +83,11 @@ finaldf = finaldf.drop(rows_to_drop).reset_index(drop=True)
 print(f"After dropping, the df contain {finaldf.shape[0]} rows")
 
 
-print("\n -----The data contian 3 types of Hebrew letters: ב,ל,מ ------- ")
+print("\n -----The data contains 3 types of Hebrew letters: ב,ל,מ ------- ")
 print(" -----Creating 3 tables to Comparisons: (ב,ל),(ב,מ),(ל,מ) ------- ")
-condition1 = finaldf['category'] == 1.0  # 1 is ב
-condition2 = finaldf['category'] == 2.0  # 2 is ל
-condition3 = finaldf['category'] == 3.0  # 3 is מ
+condition1 = finaldf['category'] == 1.0  # 1 represent the letter ב
+condition2 = finaldf['category'] == 2.0  # 2 represent the letter ל
+condition3 = finaldf['category'] == 3.0  # 3 represent the letter מ
 data23 = finaldf[~condition1]
 data13 = finaldf[~condition2]
 data12 = finaldf[~condition3]
@@ -111,10 +124,9 @@ class Adline:
             cost = (errors ** 2).sum() / 2.0
             self.errors.append(cost)
 
-            if (i > 2 and np.isclose(self.errors[-2], self.errors[-1], rtol=1e-4)):
-                return (i, errors)
+            if i > 2 and np.isclose(self.errors[-2], self.errors[-1], rtol=1e-4):
+                return i, errors
                 break
-
         return self
 
     def net_input(self, X):
@@ -151,7 +163,7 @@ class Adline:
             score = self.score(X_test, y_test)
             scores.append(score)
 
-        return (scores, np.mean(scores), iters, cost)
+        return scores, np.mean(scores), iters, cost
 
     def score(self, X, y):
         """
@@ -176,7 +188,6 @@ def trainSubTable(df):
         y = y.replace(2.0, 1.0)
 
     # Scale features
-
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     kf = KFold(n_splits=5, random_state=42, shuffle=True)
@@ -186,11 +197,12 @@ def trainSubTable(df):
     final_scores = adaline.score(X_test, y_test)
 
     d = {'score': final_scores}
-    return (d, scores, scores_mean, i, cost)
+    return d, scores, scores_mean, i, cost
 
-test_score12,scores12,scores_mean12,i12,cost12= trainSubTable(data12)
+print("\n -----Calculating the datasets ------- ")
+test_score12,scores12,scores_mean12,i12,cost12 = trainSubTable(data12)
 test_score13,scores13,scores_mean13,i13,cost13 = trainSubTable(data13)
-test_score23,scores23,scores_mean23,i23,cost23=trainSubTable(data23)
+test_score23,scores23,scores_mean23,i23,cost23 = trainSubTable(data23)
 
 # Calculate the accuracy of the model on the test set
 std_dev12 = np.std(scores12)
