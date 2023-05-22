@@ -4,6 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler
 
 print(" -----loading the files------- ")
 # from the folder 'קבצים (מ,ב,ל)' we generated united file:
@@ -43,7 +45,7 @@ def cleanData(finaldf):
 
     for i in range(len(finaldf)):
         try:
-            finaldf.iloc[i, :] = finaldf.iloc[i, :].astype('float64')
+            finaldf.iloc[i, :] = finaldf.iloc[i, :] #.astype('float64')
         except ValueError:
             rows_to_drop.append(i)
 
@@ -54,6 +56,7 @@ def cleanData(finaldf):
 
 
 df = cleanData(finaldf)
+# finaldf['category'].astype('int')
 print(df.head())
 
 print("\n -----Building the Neural Network ------- ")
@@ -137,4 +140,22 @@ def gradient_descent(X, Y, iterations, alpha):
     return W1, b1, W2, b2
 
 
-W1, b1, W2, b2 = gradient_descent(x_train, y_train, 500, 0.1)
+#W1, b1, W2, b2 = gradient_descent(x_train, y_train, 500, 0.1)
+
+x_train = x_train.T
+x_test = x_test.T
+
+scaler = StandardScaler()
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.fit_transform(x_test)
+
+# Creating and training the MLP classifier
+mlp = MLPClassifier(hidden_layer_sizes=(100, 100), activation='relu', solver='adam', random_state=42)
+mlp.fit(x_train, y_train)
+
+# Making predictions on the test set
+y_pred = mlp.predict(x_test)
+
+# Evaluating the accuracy of the classifier
+accuracy = np.mean(y_pred == y_test)
+print("Accuracy:", accuracy)
