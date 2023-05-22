@@ -45,7 +45,11 @@ def cleanData(finaldf):
 
     for i in range(len(finaldf)):
         try:
-            finaldf.iloc[i, :] = finaldf.iloc[i, :] #.astype('float64')
+            if len(finaldf.iloc[i, :]) < 100:
+                rows_to_drop.append(i)
+                continue
+
+            finaldf.iloc[i, :] = finaldf.iloc[i, :] #.astype('float')
         except ValueError:
             rows_to_drop.append(i)
 
@@ -58,6 +62,10 @@ def cleanData(finaldf):
 df = cleanData(finaldf)
 # finaldf['category'].astype('int')
 print(df.head())
+temporary = finaldf.iloc[:,:5]
+print(temporary.head())
+print(temporary.info())
+print(temporary.dtypes)
 
 print("\n -----Building the Neural Network ------- ")
 df = np.array(df)
